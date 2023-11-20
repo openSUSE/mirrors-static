@@ -1954,6 +1954,8 @@ for(const m of arr){var mirrormarker=L.marker([m.lat,m.lng]).addTo(map)
 .bindPopup('<a href='+m.url+'>'+(new URL(m.url)).hostname+'</a>');if(preferred_url&&m.url==preferred_url){mirrormarker._icon.classList.add("huechange1");}}
 const marker=L.marker([lat,lng]).addTo(map)
 .bindPopup('<i>You</i>');marker._icon.classList.add("huechange");setTimeout(function(){map.invalidateSize();},100);}
+function checkFileOnMirrors(path){$.ajax({url:'/rest/server/check_file?file='+path,type:"PUT",dataType:'json',success:function(response){handleCheckFileOnMirror(response.job_id);},error:handleAdminTableApiError});}
+function handleCheckFileOnMirror(job_id){$(location).attr('href','/minion/jobs?id='+job_id);}
 function setupReportTable(){var columns=[];columns.push({data:'region',defaultContent:""});columns.push({data:'country',defaultContent:""});columns.push({data:'url',defaultContent:""});$('#checkboxes label').each(function(){var columnName=$(this).text();if(columnName=='Blame'){return;}
 columnName=columnName.trim().replace(/ /g,"").toLowerCase().replace(/\./g,"");if(columnName.match(/^\d/)){columnName='c'+columnName;}
 columns.push({data:(columnName+'score'),defaultContent:""});columns.push({data:(columnName+'victim'),defaultContent:""});});var url=$("#reporttable_api_url").val();var table=$('.reporttable');var dataTable=table.DataTable({order:[[0,'asc']],ajax:{url:url,dataSrc:'report'},columns:columns,search:{regex:true,},});dataTable.rowData=[];$('#checkboxes').on('change',':checkbox',function(){layoutReportTable();});layoutReportTable();}
