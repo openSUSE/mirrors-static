@@ -2016,6 +2016,9 @@ return result;}
 function renderAdminTableHostname(data,type,row,meta){if(type!=='display'){return data?data:'';}
 if(isEditingAdminTableRow(meta)){return'<input type="text" value="'+htmlEscape(data)+'"/>';}
 return data?'<a href="/app/server/'+htmlEscape(data)+'">'+htmlEscape(data)+'</>':'';}
+function renderAdminTableProjectName(data,type,row,meta){if(type!=='display'){return data?data:'';}
+if(isEditingAdminTableRow(meta)){return'<input type="text" value="'+htmlEscape(data)+'"/>';}
+return data?'<a href="/app/project/'+row['id']+'">'+htmlEscape(data)+'</>':'';}
 function renderAdminTableLongText(data,type,row,meta){if(type!=='display'){return data?data:'';}
 if(isEditingAdminTableRow(meta)){return'<input type="text" value="'+htmlEscape(data)+'"/>';}
 if(data&&data.length>25){return data.substring(0,21)+'...';}
@@ -2037,10 +2040,10 @@ function setupAdminTable(editable){jQuery.extend(jQuery.fn.dataTableExt.oSort,{'
 if(str2===''){return-1;}
 return((str1<str2)?-1:((str1>str2)?1:0));},'empty-string-last-desc':function(str1,str2){if(str1===''){return 1;}
 if(str2===''){return-1;}
-return((str1<str2)?1:((str1>str2)?-1:0));}});var emptyRow={};var columns=[];var columnDefs=[];var thElements=$('.admintable thead th').each(function(){var th=$(this);var columnName;if(th.hasClass('col_action')){columnName='id';}else{columnName=th.text().trim().toLowerCase();}
-columns.push({data:columnName});var columnDef={targets:columns.length-1,type:'empty-string-last',};if(th.hasClass('col_value')){if(columnName=='hostname'){columnDef.render=renderAdminTableHostname;}else if(columnName=='public notes'||columnName=='comment'||columnName=='sponsor'){columnDef.render=renderAdminTableLongText;}else{columnDef.render=renderAdminTableValue;}
+return((str1<str2)?1:((str1>str2)?-1:0));}});var emptyRow={};var columns=[];var columnDefs=[];var url=$("#admintable_api_url").val()+window.location.search;var thElements=$('.admintable thead th').each(function(){var th=$(this);var columnName;if(th.hasClass('col_action')){columnName='id';}else{columnName=th.text().trim().toLowerCase();}
+columns.push({data:columnName});var columnDef={targets:columns.length-1,type:'empty-string-last',};if(th.hasClass('col_value')){if(columnName=='hostname'){columnDef.render=renderAdminTableHostname;}else if(columnName=='name'&&url&&url.startsWith('/rest/project')){columnDef.render=renderAdminTableProjectName;}else if(columnName=='public notes'||columnName=='comment'||columnName=='sponsor'){columnDef.render=renderAdminTableLongText;}else{columnDef.render=renderAdminTableValue;}
 emptyRow[columnName]="";}else if(th.hasClass('col_settings')){columnDef.render=renderAdminTableSettings;emptyRow.settings={};}else if(th.hasClass('col_settings_list')){columnDef.render=renderAdminTableSettingsList;columnDef.orderable=false;emptyRow.settings=[];}else if(th.hasClass('col_description')){columnDef.render=renderAdminTableDescription;emptyRow.description="";}else if(th.hasClass('col_action')){columnDef.render=renderAdminTableActions;columnDef.orderable=false;}else{emptyRow[columnName]="";}
-columnDefs.push(columnDef);});var url=$("#admintable_api_url").val()+window.location.search;var table=$('.admintable');var dataTable=table.DataTable({order:[[0,'asc']],ajax:{url:url,dataSrc:function(json){var rowData=json[Object.keys(json)[0]];if(!rowData){addFlash('danger','Internal error: server response misses table data');return(dataTable.rowData=[]);}
+columnDefs.push(columnDef);});var table=$('.admintable');var dataTable=table.DataTable({order:[[0,'asc']],ajax:{url:url,dataSrc:function(json){var rowData=json[Object.keys(json)[0]];if(!rowData){addFlash('danger','Internal error: server response misses table data');return(dataTable.rowData=[]);}
 return(dataTable.rowData=rowData);},},columns:columns,columnDefs:columnDefs,search:{regex:true,},fnInitComplete:function(oSettings,json){if(url==="/rest/server"||url=="/rest/myserver"){var servers=json.Server;if(!servers)
 servers=json.MyServer;if(!servers)
 return;var regions={};for(const server of servers){var region=server.region;if(region){if(!regions[region])regions[region]=1
@@ -2076,6 +2079,7 @@ function setupServerIncident(server_id){var table=$('#server_incident').DataTabl
 function addServerNote(hostname,kind,msg){$.ajax({type:'POST',url:'/rest/server/note/'+hostname,data:{kind:kind,msg:msg},success:function(data){location.reload();},error:function(xhr,ajaxOptions,thrownError){var error_message='An error occurred while adding server '+kind+': ';if(xhr.responseJSON&&xhr.responseJSON.error)
 error_message+=xhr.responseJSON.error;addFlash('danger',error_message);}});}
 function addServerNoteButtonStatus(){if(document.getElementById("new-note-text").value===""){document.getElementById('new-note-submit').disabled=true;}else{document.getElementById('new-note-submit').disabled=false;}}
+function setupProjectPropagation(id){var table=$('#project_propagation');var dataTable=table.DataTable({ajax:{url:'/rest/project/propagation/'+id,},deferRender:true,columns:[{data:'dt'},{data:'prefix'},{data:'version'},{data:'mirrors'}],order:[[0,'desc']],});}
 /*!
  * Bootstrap 4 multi dropdown navbar ( https://bootstrapthemes.co/demo/resource/bootstrap-4-multi-dropdown-navbar/ )
  * Copyright 2017.
