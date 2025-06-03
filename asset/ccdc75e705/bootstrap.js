@@ -2089,7 +2089,7 @@ function setupServerIncident(server_id){var table=$('#server_incident').DataTabl
 function addServerNote(hostname,kind,msg){$.ajax({type:'POST',url:'/rest/server/note/'+hostname,data:{kind:kind,msg:msg},success:function(data){location.reload();},error:function(xhr,ajaxOptions,thrownError){var error_message='An error occurred while adding server '+kind+': ';if(xhr.responseJSON&&xhr.responseJSON.error)
 error_message+=xhr.responseJSON.error;addFlash('danger',error_message);}});}
 function addServerNoteButtonStatus(){if(document.getElementById("new-note-text").value===""){document.getElementById('new-note-submit').disabled=true;}else{document.getElementById('new-note-submit').disabled=false;}}
-var pkg_param_pkg;var pkg_param_arch;var pkg_param_official;var pkg_param_os;var pkg_param_os_ver;var pkg_param_repo;var pkg_param_ign_path;var pkg_param_ign_file;var pkg_param_strict;var pkg_stat_first_seen;var pkg_stat_dl_todate='';var pkg_stat_dl_today='';var pkg_stat_dl_curr='';function initPackageParams(){const queryString=window.location.search;const urlParams=new URLSearchParams(queryString);pkg_param_pkg=urlParams.get('pkg');pkg_param_arch=urlParams.get('arch');pkg_param_official=urlParams.get('official');pkg_param_os=urlParams.get('os');pkg_param_os_ver=urlParams.get('os_ver');pkg_param_repo=urlParams.get('repo');pkg_param_ign_path=urlParams.get('ignore_path');pkg_param_ign_file=urlParams.get('ignore_file');pkg_param_strict=urlParams.get('strict');if(pkg_param_pkg){(document.getElementById("packag")||{}).value=pkg_param_pkg;}
+var pkg_param_pkg;var pkg_param_arch;var pkg_param_official;var pkg_param_os;var pkg_param_os_ver;var pkg_param_repo;var pkg_param_ign_path;var pkg_param_ign_file;var pkg_param_strict;var pkg_stat_first_seen;var pkg_stat_dl_todate='';var pkg_stat_dl_month='';var pkg_stat_dl_week='';var pkg_stat_dl_today='';var pkg_stat_dl_curr='';function initPackageParams(){const queryString=window.location.search;const urlParams=new URLSearchParams(queryString);pkg_param_pkg=urlParams.get('pkg');pkg_param_arch=urlParams.get('arch');pkg_param_official=urlParams.get('official');pkg_param_os=urlParams.get('os');pkg_param_os_ver=urlParams.get('os_ver');pkg_param_repo=urlParams.get('repo');pkg_param_ign_path=urlParams.get('ignore_path');pkg_param_ign_file=urlParams.get('ignore_file');pkg_param_strict=urlParams.get('strict');if(pkg_param_pkg){(document.getElementById("packag")||{}).value=pkg_param_pkg;}
 if(pkg_param_arch){document.getElementById("arch").value=pkg_param_arch;}
 if(pkg_param_official){document.getElementById("official").checked=pkg_param_official?1:0;}
 if(pkg_param_os){document.getElementById("os").value=pkg_param_os;}
@@ -2119,17 +2119,17 @@ data='<a href="'+path+encodeComponentExceptColon(d)+t+'">'+data+'</a>';}
 return data;}},{data:'time',className:'mtime',defaultContent:"",orderSequence:['desc','asc'],render:function(data,type,row,meta){if(type==='display'&&data>0){path=row['path']+'/';data=new Date(data*1000).toLocaleString().replace(/.\d+$/,"").replace(/:\d\d (AM|PM)$/," $1");if(row['name'].slice(-1)!='/'){data='<a href="'+path+encodeComponentExceptColon(row['file'])+'.mirrorlist">'+data+'</a>';}else{data='<a href="'+path+encodeComponentExceptColon(row['file'].slice(0,-1))+'/">'+data+'</a>';}}
 return data;}},{data:'size',className:'size',defaultContent:"",render:function(data,type,row,meta){if(type==='display'){path=row['path']+'/';if(data===null){data='...';}else if(Math.abs(data)>1024){const units=['kB','MB','GB','TB','PB','EB','ZB','YB'];let u=-1;do{data/=1024;++u;}while(Math.round(Math.abs(data)*10)>=1024&&u<units.length-1);data=data.toFixed(1)+' '+units[u];}
 data='<a href="'+path+encodeComponentExceptColon(row['file'])+'.mirrorlist">'+data+'</a>';}
-return data;}}],lengthMenu:[            [100,1000,10,-1],            [100,1000,10,'All'],        ],});}
+return data;}}],lengthMenu:[            [30,100,1000,10,-1],            [30,100,1000,10,'All'],        ],});}
+function setupDownloadStatUIElement(elementName,v,v1){var dot='...';var res;if(typeof v!='undefined'){res=v;if(+parseInt(v1)>0){res=+res+ +parseInt(v1);}
+if(+parseInt(pkg_stat_dl_curr)>0){res=+res+ +parseInt(pkg_stat_dl_curr);dot='';}}
+document.getElementById(elementName).textContent=String(res).concat(dot);}
 function setupDownloadStatUI(){if(typeof pkg_stat_first_seen!='undefined'){res=pkg_stat_first_seen;if(+parseInt(pkg_stat_first_seen)>0){res=new Date(+parseInt(pkg_stat_first_seen)*1000).toISOString();res=res.substring(0,16)+res.substr(23)}
 document.getElementById("download-stat-first-seen").textContent=res;}
-if(typeof pkg_stat_dl_todate!='undefined'){var res=pkg_stat_dl_todate;if(+parseInt(pkg_stat_dl_today)>0){res=+res+ +parseInt(pkg_stat_dl_today);}
-if(+parseInt(pkg_stat_dl_curr)>0){res=+res+ +parseInt(pkg_stat_dl_curr);}
-document.getElementById("download-stat-total").textContent=res;}
-if(typeof pkg_stat_dl_today!='undefined'){var res=pkg_stat_dl_today;if(+parseInt(pkg_stat_dl_curr)>0){res=+res+ +parseInt(pkg_stat_dl_curr);}
-document.getElementById("download-stat-today").textContent=res;}
-if(typeof pkg_stat_dl_today!='undefined'){var res=pkg_stat_dl_curr;document.getElementById("download-stat-curr").textContent=res;}}
+setupDownloadStatUIElement("download-stat-total",pkg_stat_dl_todate,pkg_stat_dl_today);setupDownloadStatUIElement("download-stat-month",pkg_stat_dl_month,pkg_stat_dl_today);setupDownloadStatUIElement("download-stat-week",pkg_stat_dl_week,pkg_stat_dl_today);setupDownloadStatUIElement("download-stat-today",pkg_stat_dl_today);if(typeof pkg_stat_dl_today!='undefined'){var res=pkg_stat_dl_curr;document.getElementById("download-stat-curr").textContent=res;}}
 function setupPackageStatDownload(id){$.ajax({url:'/rest/package/'+id+'/stat_download',method:'GET',success:function(response){var data=response.data[0];if(typeof data==='undefined'){return;}
 var c=data.cnt_total;if(typeof c!=='undefined'&&c>0){pkg_stat_dl_todate=c;}
+c=data.cnt_30d;if(typeof c!=='undefined'&&c>0){pkg_stat_dl_month=c;}
+c=data.cnt_7d;if(typeof c!=='undefined'&&c>0){pkg_stat_dl_week=c;}
 c=data.cnt_today;if(typeof c!=='undefined'&&c>0){pkg_stat_dl_today=c;}
 c=data.first_seen;if(typeof c!=='undefined'&&c>0){pkg_stat_first_seen=c;}
 setupDownloadStatUI();},error:handleAjaxError,});}
